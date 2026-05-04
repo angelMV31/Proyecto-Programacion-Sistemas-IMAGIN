@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>IMAGIN - Engine & Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-layout">
+        <!-- SECCIÓN 1: PANTALLA DE JUEGO (Lo que ve el usuario) -->
+        <section class="game-view">
+            <div class="game-header">
+                <h2>🎮 MODO JUEGO</h2>
+                <div class="stats">
+                    ❤️ Vida: <span id="val-vida">100</span> | ⭐ Puntos: <span id="val-puntos">0</span>
+                </div>
+            </div>
+            <div id="pantalla-narrativa">
+                <p id="texto-escena">Carga una historia para comenzar...</p>
+                <div id="opciones-contenedor"></div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: PANEL DE CONTROL (Tu consola de robustez) -->
+        <section class="dev-view">
+            <h3>🛠️ PANEL DE DESARROLLADOR (Equipo #04)</h3>
+            <textarea id="codigo-editor" spellcheck="false">
+FROM inicio
+DISPLAY Llegas a un cruce en el bosque.
+OPTION(Ir al Norte, Ir al Sur)
+
+FROM ir_al_norte
+ADD puntos 50
+DISPLAY ¡Encontraste un cofre! Ganas 50 puntos.
+DISPLAYEND Fin del camino.
+
+FROM ir_al_sur
+ADD vida -20
+DISPLAY Caíste en un pozo. Pierdes 20 de vida.
+DISPLAYEND Estás herido. Fin.</textarea>
+            
+            <button id="btn-compilar" onclick="compilarYJugar()">⚙️ Compilar y Probar Robustez</button>
+            
+            <div id="consola-robustez">
+                <!-- Aquí aparecerán tus mensajes UX de error -->
+            </div>
+        </section>
+    </div>
+    <script src="interpreter.js"></script>
+</body>
+</html>
