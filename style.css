@@ -9,7 +9,7 @@
 .btn-opcion:hover { background: #005f9e; }
 
 /* Estilos de Consola (Tus errores UX) */
-#codigo-editor { height: 200px; background: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 10px; margin-bottom: 10px; }
+#codigo-editor { height: 250px; background: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 10px; margin-bottom: 10px; resize: none;}
 #consola-robustez { flex: 1; background: black; padding: 10px; border: 1px solid #333; font-family: monospace; overflow-y: auto; font-size: 0.9rem; }
 .error-titulo { color: #ff5555; font-weight: bold; } /* Rojo */
 .error-linea { color: #5555ff; } /* Azul */
