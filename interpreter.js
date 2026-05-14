@@ -1,5 +1,27 @@
-let variables = { vida: 100, puntos: 0 };
+let variables = { vida: 1, puntos: 0 };
 let mapaEscenas = {};
+
+function actualizarInterfazStats() {
+    // Busca los elementos por el ID que ya tienes en tu HTML
+    const spanVida = document.getElementById("val-vida");
+    const spanPuntos = document.getElementById("val-puntos");
+
+    if (spanVida){
+        spanVida.innerText = variables.vida;
+
+        // Feedback visual: Si la vida es baja, ponerla en rojo
+        if (variables.vida <= 20) {
+            spanVida.style.color = "#ff5555";
+            spanVida.style.fontWeight = "bold";
+        } else {
+            spanVida.style.color = "white";
+        }
+    }
+
+    if (spanPuntos){
+        spanPuntos.innerText = variables.puntos;
+    }
+}
 
 function compilarYJugar() {
     const codigo = document.getElementById("codigo-editor").value;
@@ -10,6 +32,9 @@ function compilarYJugar() {
     consola.innerHTML = "";
     mapaEscenas = {};
     variables = { vida: 100, puntos: 0 };
+
+    actualizarInterfazStats();
+
     let hayError = false;
 
     // --- FASE 1: ESCUDO DE ROBUSTEZ ---
@@ -59,11 +84,28 @@ function iniciarNavegacion() {
 
 function mostrarEscena(nombre) {
     const datos = mapaEscenas[nombre];
+    if (!datos) return;
+
+    let textoFinal = datos.texto;
+
+    let mensajeExtra = procesarComandos(datos.comandos);
+
+    if (mensajeExtra) {
+        textoFinal += "\n\n" + mensajesExtra;
+    }
+
+    document.getElementById("texto-escena").innerText = textoFinal;
+    
+    actualizarInterfazStats();
+
+    // --- LA CLAVE: Procesar los comandos de esta escena apenas entramos ---
+    procesarComandos(datos.comandos);
+
+    // Actualizar el texto de la pantalla
     document.getElementById("texto-escena").innerText = datos.texto;
     
-    // Actualizar Stats
-    document.getElementById("val-vida").innerText = variables.vida;
-    document.getElementById("val-puntos").innerText = variables.puntos;
+    // Actualizar los números en la interfaz
+    actualizarInterfazStats();
 
     const contenedor = document.getElementById("opciones-contenedor");
     contenedor.innerHTML = "";
@@ -73,12 +115,13 @@ function mostrarEscena(nombre) {
         btn.className = "btn-opcion";
         btn.innerText = opt;
         btn.onclick = () => {
-            // Lógica de navegación simple: busca la escena que coincida con la opción
-            let destino = opt.toLowerCase().replace(/ /g, "_");
-            procesarComandos(datos.comandos);
-            if (mapaEscenas[destino]) mostrarEscena(destino);
-            else {
-                // Si no hay destino, buscamos la siguiente escena en el mapa por orden
+            // Convertimos el texto de la opción a un formato de ID (ej: "Ir al Norte" -> "ir_al_norte")
+            let destino = opt.toLowerCase().trim().replace(/ /g, "_");
+            
+            if (mapaEscenas[destino]) {
+                mostrarEscena(destino);
+            } else {
+                // Si no hay destino específico, buscamos la siguiente escena en la lista
                 let keys = Object.keys(mapaEscenas);
                 let sigIdx = keys.indexOf(nombre) + 1;
                 if (keys[sigIdx]) mostrarEscena(keys[sigIdx]);
@@ -90,15 +133,33 @@ function mostrarEscena(nombre) {
 
 function procesarComandos(cmds) {
     cmds.forEach(c => {
+        // Comando ADD Suma o Resta vida del jugador
         if (c.startsWith("ADD")) {
             let p = c.split(" ");
             let variable = p[1].toLowerCase();
-            variables[variable] += parseInt(p[2]);
+            let valor = parseInt(p[2]);
+        if (variables.hasOwnProperty(variable)) {
+                variables[variable] += valor;
         }
+        }
+        
+        // Comando SET: Asigna un valor fijo (ej: SET vida 100)
+        if (c.startsWith("SET")) {
+            let p = c.split(" ");
+            let variable = p[1].toLowerCase();
+            let valor = parseInt(p[2]);
+            if (variables.hasOwnProperty(variable)) {
+                variables[variable] = valor;
+            }
+        }
+
         if (c.startsWith("DISPLAYEND")) {
             alert("Fin de la historia: " + c.replace("DISPLAYEND", ""));
         }
     });
+
+    // Actualizar la interfaz después de cambiar las variables
+    actualizarInterfazStats();
 }
 
 function imprimirError(num, linea, msg) {

@@ -41,19 +41,22 @@
                 </div>
             </div>
             <textarea id="codigo-editor" spellcheck="false">
-FROM inicio
-DISPLAY Llegas a un cruce en el bosque.
-OPTION(Ir al Norte, Ir al Sur)
+                FROM inicio
+                DISPLAY ¿Quieres puntos gratis?
+                OPTION(Si por favor, No gracias)
 
-FROM ir_al_norte
-ADD puntos 50
-DISPLAY ¡Encontraste un cofre! Ganas 50 puntos.
-DISPLAYEND Fin del camino.
+                FROM si_por_favor
+                ADD puntos 100
+                ADD vida -10
+                DISPLAY ¡Has ganado 100 puntos pero te cansaste!
+                DISPLAYEND Fin de la prueba.
 
-FROM ir_al_sur
-ADD vida -20
-DISPLAY Caíste en un pozo. Pierdes 20 de vida.
-DISPLAYEND Estás herido. Fin.</textarea>
+                FROM no_gracias
+                ADD puntos 1
+                ADD vida -95
+                DISPLAY ¡Error tuyo!
+                DISPLAYEND Fin.
+            </textarea>
             
             <button id="btn-compilar" onclick="compilarYJugar()">⚙️ Compilar y Probar Robustez</button>
             
