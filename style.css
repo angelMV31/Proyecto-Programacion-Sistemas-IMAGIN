@@ -14,3 +14,66 @@
 .error-titulo { color: #ff5555; font-weight: bold; } /* Rojo */
 .error-linea { color: #5555ff; } /* Azul */
 .error-sugerencia { color: #55ff55; } /* Verde */
+
+.help-wrap {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  padding: 0 0 10px 0;
+}
+
+.help-button {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #0077cc;
+  color: #fff;
+  font-weight: 700;
+  cursor: default;
+  user-select: none;
+}
+
+.help-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  min-width: 240px;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+  padding: 6px 0;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+  z-index: 100;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 14px;
+  color: #111;
+}
+
+.help-wrap:hover .help-menu,
+.help-wrap:focus-within .help-menu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: none; /* evita interacción */
+}
+
+.help-item {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #f2f2f2;
+  white-space: nowrap;
+}
+
+.help-item:last-child {
+  border-bottom: 0;
+}
