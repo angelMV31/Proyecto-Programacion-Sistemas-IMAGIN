@@ -65,7 +65,7 @@ function compilarYJugar() {
             } else if (texto.startsWith("OPTION")) {
                 let contenido = texto.match(/\((.*?)\)/)[1];
                 mapaEscenas[escenaActualRef].opciones = contenido.split(",").map(o => o.trim());
-            } else if (texto.startsWith("ADD") || texto.startsWith("DISPLAYEND")) {
+            } else if (texto.startsWith("ADD") || texto.startsWith("DISPLAYEND") || texto.startsWith("GOTO")) {
                 mapaEscenas[escenaActualRef].comandos.push(texto);
             }
         }
@@ -144,6 +144,13 @@ function procesarComandos(cmds, nombre) {
             if (variables.hasOwnProperty(variable)) {
                 variables[variable] = valor;
             }
+        }
+
+        if (c.startsWith("GOTO")) {
+            let destino = c.split(" ")[1];
+            setTimeout(() => {
+                if (mapaEscenas[destino]) mostrarEscena(destino);
+            }, 5500);
         }
 
         if (c.startsWith("DISPLAYEND")) {
