@@ -60,7 +60,7 @@ function compilarYJugar() {
             escenaActualRef = nombre;
             mapaEscenas[nombre] = { texto: "", opciones: [], comandos: [] };
         } else if (escenaActualRef) {
-            if (texto.startsWith("DISPLAY")) {
+            if (texto.startsWith("DISPLAY") && !texto.startsWith("DISPLAYEND")) {
                 mapaEscenas[escenaActualRef].texto = texto.replace("DISPLAY", "").trim();
             } else if (texto.startsWith("OPTION")) {
                 let contenido = texto.match(/\((.*?)\)/)[1];
@@ -91,20 +91,11 @@ function mostrarEscena(nombre) {
     let mensajeExtra = procesarComandos(datos.comandos);
 
     if (mensajeExtra) {
-        textoFinal += "\n\n" + mensajesExtra;
+        textoFinal += "\n\n" + mensajeExtra;
     }
 
     document.getElementById("texto-escena").innerText = textoFinal;
     
-    actualizarInterfazStats();
-
-    // --- LA CLAVE: Procesar los comandos de esta escena apenas entramos ---
-    procesarComandos(datos.comandos);
-
-    // Actualizar el texto de la pantalla
-    document.getElementById("texto-escena").innerText = datos.texto;
-    
-    // Actualizar los números en la interfaz
     actualizarInterfazStats();
 
     const contenedor = document.getElementById("opciones-contenedor");
@@ -132,6 +123,8 @@ function mostrarEscena(nombre) {
 }
 
 function procesarComandos(cmds) {
+    let mensajeExtra = "";
+
     cmds.forEach(c => {
         // Comando ADD Suma o Resta vida del jugador
         if (c.startsWith("ADD")) {
@@ -154,8 +147,21 @@ function procesarComandos(cmds) {
         }
 
         if (c.startsWith("DISPLAYEND")) {
-            alert("Fin de la historia: " + c.replace("DISPLAYEND", ""));
+            let msg = c.replace("DISPLAYEND", "").trim();
+            mensajeExtra = "" + msg;
+            setTimeout(() => {
+            document.getElementById("texto-escena").innerText = "" + msg;
+            const contenedor = document.getElementById("opciones-contenedor");
+            contenedor.innerHTML = "";
+            let btn = document.createElement("button");
+            btn.className = "btn-opcion";
+            btn.innerText = "🔄 Jugar de nuevo";
+            btn.onclick = () => compilarYJugar();
+            contenedor.appendChild(btn);
+            }, 8000);
         }
+
+        return mensajeExtra;
     });
 
     // Actualizar la interfaz después de cambiar las variables
