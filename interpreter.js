@@ -2,14 +2,14 @@ let variables = { vida: 1, puntos: 0 };
 let mapaEscenas = {};
 
 function actualizarInterfazStats() {
-    // Buscar elementos por el ID en HTML
+    // Busca los elementos por el ID que ya tienes en tu HTML
     const spanVida = document.getElementById("val-vida");
     const spanPuntos = document.getElementById("val-puntos");
 
     if (spanVida){
         spanVida.innerText = variables.vida;
 
-        //Si la vida es baja, se muestra en rojo
+        // Feedback visual: Si la vida es baja, ponerla en rojo
         if (variables.vida <= 20) {
             spanVida.style.color = "#ff5555";
             spanVida.style.fontWeight = "bold";
@@ -44,7 +44,7 @@ function compilarYJugar() {
         let texto = lineas[i].trim();
         if (!texto || texto.startsWith("#")) continue;
 
-        // Validaciones de tabla de errores
+        // Validaciones de tu tabla de errores
         if (texto.startsWith("FORM")) {
             imprimirError(i+1, texto, "Comando 'FORM' no reconocido. ¿Quisiste decir 'FROM'?");
             hayError = true; break;
@@ -60,7 +60,7 @@ function compilarYJugar() {
             escenaActualRef = nombre;
             mapaEscenas[nombre] = { texto: "", opciones: [], comandos: [] };
         } else if (escenaActualRef) {
-            if (texto.startsWith("DISPLAY")) {
+            if (texto.startsWith("DISPLAY") && !texto.startsWith("DISPLAYEND")) {
                 mapaEscenas[escenaActualRef].texto = texto.replace("DISPLAY", "").trim();
             } else if (texto.startsWith("OPTION")) {
                 let contenido = texto.match(/\((.*?)\)/)[1];
@@ -86,20 +86,18 @@ function mostrarEscena(nombre) {
     const datos = mapaEscenas[nombre];
     if (!datos) return;
 
-    // 1. Procesar comandos y capturar los anuncios que devuelven
-    let mensajesDeComandos = procesarComandos(datos.comandos);
+    let mensajeExtra = procesarComandos(datos.comandos, nombre);
+   
+    let textoFinal = datos.texto;
 
-    // 2. Construir el texto final: Texto base + Anuncios
-    // Usa "\n\n" para dar un espacio visual entre la historia y el aviso de puntos/vida
-    let textoCompleto = datos.texto;
-    if (mensajesDeComandos) {
-        textoCompleto += "\n\n" + mensajesDeComandos;
+    if (mensajeExtra) {
+        textoFinal += "\n\n" + mensajeExtra;
     }
 
-    // 3. Dibujar en pantalla
-    document.getElementById("texto-escena").innerText = textoCompleto;
+    document.getElementById("texto-escena").innerText = textoFinal;
     
-    // 4. Genera botones de opciones
+    actualizarInterfazStats();
+
     const contenedor = document.getElementById("opciones-contenedor");
     contenedor.innerHTML = "";
 
@@ -108,10 +106,13 @@ function mostrarEscena(nombre) {
         btn.className = "btn-opcion";
         btn.innerText = opt;
         btn.onclick = () => {
+            // Convertimos el texto de la opción a un formato de ID (ej: "Ir al Norte" -> "ir_al_norte")
             let destino = opt.toLowerCase().trim().replace(/ /g, "_");
+            
             if (mapaEscenas[destino]) {
                 mostrarEscena(destino);
             } else {
+                // Si no hay destino específico, buscamos la siguiente escena en la lista
                 let keys = Object.keys(mapaEscenas);
                 let sigIdx = keys.indexOf(nombre) + 1;
                 if (keys[sigIdx]) mostrarEscena(keys[sigIdx]);
@@ -121,11 +122,11 @@ function mostrarEscena(nombre) {
     });
 }
 
-function procesarComandos(cmds) {
-    let anuncios = []; // Para guardar los mensajes de DISPLAY extras
+function procesarComandos(cmds, nombre) {
+    let mensajeExtra = "";
 
     cmds.forEach(c => {
-        // Comando ADD
+        // Comando ADD Suma o Resta vida del jugador
         if (c.startsWith("ADD")) {
             let p = c.split(" ");
             let variable = p[1].toLowerCase();
@@ -135,7 +136,7 @@ function procesarComandos(cmds) {
             }
         }
         
-        // Comando SET
+        // Comando SET: Asigna un valor fijo (ej: SET vida 100)
         if (c.startsWith("SET")) {
             let p = c.split(" ");
             let variable = p[1].toLowerCase();
@@ -145,19 +146,27 @@ function procesarComandos(cmds) {
             }
         }
 
-        // CAPTURAR DISPLAY EXTRAS 
-        // Solo guarda como anuncio si NO es el DISPLAY principal (o si quieres que se acumule)
-        if (c.startsWith("DISPLAY") && !c.startsWith("DISPLAYEND")) {
-            anuncios.push(c.replace("DISPLAY", "").trim());
+        if (c.startsWith("DISPLAYEND")) {
+            let msg = c.replace("DISPLAYEND", "").trim();
+            mensajeExtra = " " + msg;
+            setTimeout(() => {
+                document.getElementById("texto-escena").innerText = " " + msg;
+                const contenedor = document.getElementById("opciones-contenedor");
+                contenedor.innerHTML = "";
+                let btn = document.createElement("button");
+                btn.className = "btn-opcion";
+                btn.innerText = "🔄 Volver a jugar";
+                btn.onclick = () => compilarYJugar();
+
+                contenedor.appendChild(btn);
+            }, 5500);
         }
 
-        if (c.startsWith("DISPLAYEND")) {
-            alert("Fin de la historia: " + c.replace("DISPLAYEND", ""));
-        }
+        return mensajeExtra;
     });
 
+    // Actualizar la interfaz después de cambiar las variables
     actualizarInterfazStats();
-    return anuncios.join("\n"); // Devolver los anuncios encontrados
 }
 
 function imprimirError(num, linea, msg) {
